@@ -1,5 +1,5 @@
 package tickrecorder;
 
-public class Config implements PublicConfig, PrivateConfig {
-    
+public class Config implements PublicConfig {
+
 }

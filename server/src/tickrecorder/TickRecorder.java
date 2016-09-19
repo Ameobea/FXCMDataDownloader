@@ -17,7 +17,7 @@ public class TickRecorder{
             ResponseListener responseListener = new ResponseListener(session);
             session.subscribeResponse(responseListener);
 
-            //subscribeToPriceUpdates(offersTable);
+            subscribeToPriceUpdates(offersTable);
 
             setupRedis(session);
         }catch(java.lang.NullPointerException ex){

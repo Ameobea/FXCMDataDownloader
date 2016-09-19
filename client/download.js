@@ -48,11 +48,10 @@ var redisSubClient = redis.createClient();
 redisSubClient.subscribe("historicalPrices");
 
 var requestQueue; // holds uuids of sent segment requests
-var downloadQueue; // holds uuids of accepted segment requests
-var successQueue; // holds uuids of downloaded segments
+var downloadQueue; // holds ids and uuids of accepted segment requests
+var successQueue; // holds ids of downloaded segments
 
 var lastDataMs; // time in ms of last recieved data from server
-var downloading = false;
 
 redisSubClient.on("message", (channel, message)=>{
   if(logLevel == 2){
@@ -62,7 +61,7 @@ redisSubClient.on("message", (channel, message)=>{
 
   if(parsed.error == "No ticks in range"){
     lastDataMs = Date.now();
-    downloadQueue.push({uuid: parsed.uuid, id: parsed.id});
+    successQueue.push(parsed.id);
   }else if(parsed.status && parsed.status == ">300 data"){ //there were more than 300 ticks in the 10-second range
     //TODO: Handle >300 ticks
     if(logLevel >= 1){
@@ -126,15 +125,17 @@ var verifyDownload = ()=>{
       requestQueue.forEach(request=>{
         //Thanks to https://github.com/dalexj for these sexy lines:
         let filtered = downloadQueue.filter(download => download.uuid === request.uuid);
-        let downloadMatches = filtered.length == 1;
+        let downloadMatches = filtered.length >= 1;
 
+        // If the request was received by the server
         if(downloadMatches){
-          let id = filtered[0].id;
-
-          if(!successQueue.includes(id)){
+          // If no response was received
+          if(!successQueue.includes(filtered[0].id)){
             console.log("resending " + request.uuid);
             toResend.push(request);
           }
+        }else{ // server never got our request
+          toResend.push(request);
         }
       });
 
@@ -151,11 +152,11 @@ var verifyDownload = ()=>{
       }else{
         f();
       }
-    }
+    };
 
     verify();
   });
-}
+};
 
 var downloadWaiter = ()=>{
   return new Promise((f,r)=>{
@@ -165,17 +166,17 @@ var downloadWaiter = ()=>{
       }else{
         setTimeout(check, checkDelay/10);
       }
-    }
+    };
 
     check();
   });
-}
+};
 
 var resetQueues = ()=>{
   requestQueue = [];
   downloadQueue = [];
   successQueue = [];
-}
+};
 
 var existingFiles = {};
 var toAppend;

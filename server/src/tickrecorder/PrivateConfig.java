@@ -1,9 +1,9 @@
 package tickrecorder;
 
 public interface PrivateConfig {
-    public String FXCMUsername = "D102329430001";
-    public String FXCMPassword = "8934";
+    public String FXCMUsername = "Dxxxxxxxxxxxx";
+    public String FXCMPassword = "xxxx";
     public String FXCMHostsURL = "http://www.fxcorporate.com/Hosts.jsp";
-    public String redisIP = "new.ameobea.me";
+    public String redisIP = "localhost";
     public int redisPort = 6379;
 }

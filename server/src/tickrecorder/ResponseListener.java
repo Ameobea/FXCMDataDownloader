@@ -43,7 +43,7 @@ public class ResponseListener implements IO2GResponseListener {
     }
 
     public void onRequestFailed(String requestID, String err){
-        System.out.println("Request failed with error " + err);
+        System.out.println("Request failed, " + err);
         if(err.contains("unsupported scope")){
             TickRecorder.redisPublish("historicalPrices", "{\"error\": \"No ticks in range\", \"id\": \"" + requestID + "\"}");
         }
